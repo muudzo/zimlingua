@@ -72,3 +72,29 @@ class DataLoader:
             
         logger.info(f"Loaded {len(data)} pairs from parallel TXT files")
         return data
+
+    @staticmethod
+    def normalize_text(text: str) -> str:
+        """
+        Normalizes text: lowercasing, stripping whitespace, removing emojis/special chars if needed.
+        """
+        import re
+        import unicodedata
+
+        if not isinstance(text, str):
+            return ""
+
+        # Lowercase and strip
+        text = text.lower().strip()
+
+        # Normalize unicode characters
+        text = unicodedata.normalize("NFKC", text)
+
+        # Remove emojis (simple regex range for common emojis)
+        # This is valid for many emoji ranges but not exhaustive
+        text = re.sub(r'[^\w\s\.,!?\'"-]', '', text)
+
+        # Collapse multiple spaces
+        text = re.sub(r'\s+', ' ', text)
+
+        return text.strip()
