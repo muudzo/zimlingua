@@ -42,3 +42,39 @@ class Translator:
         except Exception as e:
             logger.error(f"Failed to load model architecture: {e}")
             raise
+
+    def translate_batch(self, source_text: List[str], source_lang: str, target_lang: str, beam_size: int = 5) -> List[str]:
+        """
+        Translates a batch of sentences from source_lang to target_lang.
+        """
+        if not source_text:
+            return []
+        
+        # 1. Tokenize (with HF tokenizer)
+        # NLLB requires setting src_lang on tokenizer
+        self.tokenizer.src_lang = source_lang
+        
+        # We need to manually tokenize for CTranslate2
+        # CT2 expects list of list of tokens (strings)
+        source_tokens = [self.tokenizer.convert_ids_to_tokens(self.tokenizer.encode(text)) for text in source_text]
+        
+        # 2. Run Inference
+        results = self.translator.translate_batch(
+            source_tokens,
+            target_prefix=[[target_lang]] * len(source_text),
+            beam_size=beam_size
+        )
+
+        # 3. Detokenize
+        # CT2 returns a result object, we extract the first hypothesis tokens
+        target_tokens = [result.hypotheses[0] for result in results]
+        # Detokenize using the HF tokenizer's decoder logic (convert_tokens_to_string)
+        translated_text = [
+            self.tokenizer.decode(
+                self.tokenizer.convert_tokens_to_ids(tokens), 
+                skip_special_tokens=True
+            ) 
+            for tokens in target_tokens
+        ]
+        
+        return translated_text
