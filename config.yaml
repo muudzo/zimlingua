@@ -1,0 +1,21 @@
+model:
+  name: "facebook/nllb-200-distilled-600M"
+  cache_dir: "models/hf_cache"
+  ct2_model_path: "models/ctranslate2_int8"
+  device: "auto"  # auto, cpu, cuda
+  compute_type: "int8" # int8, int8_float16, float16, float32
+
+quantization:
+  beam_size: 5
+  batch_type: "tokens"
+  max_batch_size: 1024
+
+data:
+  max_length: 128
+  source_lang: "eng_Latn"
+  target_lang: "sna_Latn" # Shona
+  
+languages:
+  en: "eng_Latn"
+  sn: "sna_Latn" # Shona
+  nd: "nde_Latn" # Ndebele
