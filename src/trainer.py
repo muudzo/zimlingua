@@ -49,3 +49,38 @@ class ZimTrainer:
         
         self.model = get_peft_model(self.model, peft_config)
         self.model.print_trainable_parameters()
+
+    def train(self, train_dataset, val_dataset, batch_size: int = 4, epochs: int = 3, learning_rate: float = 2e-4):
+        """
+        Executes the training loop.
+        """
+        logger.info("Starting training loop...")
+        
+        args = Seq2SeqTrainingArguments(
+            output_dir=self.output_dir,
+            evaluation_strategy="epoch",
+            learning_rate=learning_rate,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
+            weight_decay=0.01,
+            save_total_limit=3,
+            num_train_epochs=epochs,
+            predict_with_generate=True,
+            fp16=(self.device == "cuda"), # Use FP16 if on CUDA
+            push_to_hub=False,
+            logging_steps=100,
+        )
+        
+        data_collator = DataCollatorForSeq2Seq(self.tokenizer, model=self.model)
+        
+        self.trainer = Seq2SeqTrainer(
+            model=self.model,
+            args=args,
+            train_dataset=train_dataset,
+            eval_dataset=val_dataset,
+            data_collator=data_collator,
+            tokenizer=self.tokenizer,
+        )
+        
+        self.trainer.train()
+        logger.info("Training complete.")
