@@ -98,3 +98,19 @@ class DataLoader:
         text = re.sub(r'\s+', ' ', text)
 
         return text.strip()
+
+    def deduplicate(self, data: List[Dict[str, str]]) -> List[Dict[str, str]]:
+        """
+        Removes duplicate source-target pairs from the dataset.
+        """
+        unique_pairs = set()
+        deduplicated_data = []
+        
+        for item in data:
+            pair = (item['source'], item['target'])
+            if pair not in unique_pairs:
+                unique_pairs.add(pair)
+                deduplicated_data.append(item)
+        
+        logger.info(f"Deduplication: Removed {len(data) - len(deduplicated_data)} duplicates. Remaining: {len(deduplicated_data)}")
+        return deduplicated_data
