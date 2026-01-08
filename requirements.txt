@@ -1,0 +1,5 @@
+torch>=2.0.0
+ctranslate2>=3.0.0
+sentencepiece>=0.1.99
+transformers>=4.30.0
+datasets>=2.14.0
