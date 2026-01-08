@@ -45,8 +45,9 @@ def main():
         sys.exit(1)
 
 def _handle_single_translate(translator, text, src, tgt):
-    result = translator.translate_batch([text], idx_source_lang=src, target_lang=tgt) # Correction: method signature check needed
-    print(f"\n[{src} -> {tgt}]: {result[0]}\n")
+    # Note: translate_batch expects source_lang, target_lang arguments
+    results = translator.translate_batch([text], source_lang=src, target_lang=tgt)
+    print(f"\n[{src} -> {tgt}]: {results[0]}\n")
 
 def _handle_file_translate(translator, path, out_path, src, tgt):
     # Skeleton for file handling
