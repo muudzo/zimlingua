@@ -78,3 +78,16 @@ class Translator:
         ]
         
         return translated_text
+
+    def get_language_code(self, short_code: str) -> str:
+        """
+        Maps short language codes (e.g., 'en') to FLORES-200 codes (e.g., 'eng_Latn').
+        """
+        languages = config.get("languages", {})
+        if short_code in languages:
+            return languages[short_code]
+        
+        # If not in mapping, assume it might already be a FLORES code or return as is
+        # Ideally validation should be stricter
+        logger.debug(f"Language code {short_code} not found in config, using as-is.")
+        return short_code
