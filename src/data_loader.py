@@ -1,0 +1,74 @@
+import pandas as pd
+from pathlib import Path
+from typing import List, Dict, Optional, Union
+from src.utils import logger
+from src.config import config
+
+class DataLoader:
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        if not self.data_dir.exists():
+            self.data_dir.mkdir(parents=True)
+
+    def load_csv(self, filename: str, source_col: str, target_col: str) -> List[Dict[str, str]]:
+        """
+        Loads a CSV dataset and returns a list of source-target pairs.
+        """
+        file_path = self.data_dir / filename
+        if not file_path.exists():
+            logger.error(f"File not found: {file_path}")
+            raise FileNotFoundError(f"{file_path} does not exist")
+
+        try:
+            df = pd.read_csv(file_path)
+            if source_col not in df.columns or target_col not in df.columns:
+                raise ValueError(f"Columns {source_col} and/or {target_col} missing in CSV")
+            
+            # Drop NaN values
+            df = df.dropna(subset=[source_col, target_col])
+            
+            data = []
+            for _, row in df.iterrows():
+                data.append({
+                    "source": str(row[source_col]),
+                    "target": str(row[target_col])
+                })
+            
+            logger.info(f"Loaded {len(data)} pairs from {filename}")
+            return data
+        except Exception as e:
+            logger.error(f"Error loading CSV {filename}: {e}")
+            raise
+
+    def load_txt(self, source_file: str, target_file: str) -> List[Dict[str, str]]:
+        """
+        Loads parallel TXT files (line-by-line alignment).
+        """
+        src_path = self.data_dir / source_file
+        tgt_path = self.data_dir / target_file
+
+        if not src_path.exists() or not tgt_path.exists():
+            raise FileNotFoundError("Source or target file not found")
+
+        with open(src_path, 'r', encoding='utf-8') as f_src, \
+             open(tgt_path, 'r', encoding='utf-8') as f_tgt:
+            
+            src_lines = f_src.readlines()
+            tgt_lines = f_tgt.readlines()
+
+        if len(src_lines) != len(tgt_lines):
+            logger.warning(f"Line count mismatch: Source={len(src_lines)}, Target={len(tgt_lines)}")
+            # Truncate to minimum length
+            min_len = min(len(src_lines), len(tgt_lines))
+            src_lines = src_lines[:min_len]
+            tgt_lines = tgt_lines[:min_len]
+
+        data = []
+        for s, t in zip(src_lines, tgt_lines):
+            data.append({
+                "source": s.strip(),
+                "target": t.strip()
+            })
+            
+        logger.info(f"Loaded {len(data)} pairs from parallel TXT files")
+        return data
