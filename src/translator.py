@@ -54,9 +54,10 @@ class Translator:
         # NLLB requires setting src_lang on tokenizer
         self.tokenizer.src_lang = source_lang
         
-        # We need to manually tokenize for CTranslate2
-        # CT2 expects list of list of tokens (strings)
-        source_tokens = [self.tokenizer.convert_ids_to_tokens(self.tokenizer.encode(text)) for text in source_text]
+        # Optimization: Use tokenizer.tokenize directly which is faster than encode -> convert
+        # Also, checking if we can use batch_encode_plus if we wanted IDs, but for CT2 strings are needed
+        # We stick to list comprehension but use .tokenize()
+        source_tokens = [self.tokenizer.tokenize(text) for text in source_text]
         
         # 2. Run Inference
         results = self.translator.translate_batch(
