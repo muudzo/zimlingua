@@ -1,5 +1,12 @@
 import torch
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
+from transformers import (
+    AutoModelForSeq2SeqLM, 
+    AutoTokenizer, 
+    Seq2SeqTrainingArguments, 
+    Seq2SeqTrainer, 
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback
+)
 from typing import Optional, Dict
 from src.utils import logger, get_device
 from src.config import config
@@ -69,6 +76,8 @@ class ZimTrainer:
             fp16=(self.device == "cuda"), # Use FP16 if on CUDA
             push_to_hub=False,
             logging_steps=100,
+            load_best_model_at_end=True, # Required for EarlyStopping
+            metric_for_best_model="loss",
         )
         
         data_collator = DataCollatorForSeq2Seq(self.tokenizer, model=self.model)
@@ -80,6 +89,7 @@ class ZimTrainer:
             eval_dataset=val_dataset,
             data_collator=data_collator,
             tokenizer=self.tokenizer,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
         )
         
         self.trainer.train()
