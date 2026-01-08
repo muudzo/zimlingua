@@ -126,3 +126,29 @@ class DataLoader:
         except Exception as e:
             logger.error(f"Failed to load tokenizer for {model_name}: {e}")
             raise
+
+    def filter_by_length_ratio(self, data: List[Dict[str, str]], threshold: float = 1.5) -> List[Dict[str, str]]:
+        """
+        Filters out pairs where the length ratio between source and target deviates significantly.
+        This often indicates misalignment or bad translations.
+        """
+        filtered_data = []
+        dropped_count = 0
+        
+        for item in data:
+            src_len = len(item['source'].split())
+            tgt_len = len(item['target'].split())
+            
+            if src_len == 0 or tgt_len == 0:
+                dropped_count += 1
+                continue
+                
+            ratio = src_len / tgt_len
+            if ratio < (1/threshold) or ratio > threshold:
+                dropped_count += 1
+                continue
+                
+            filtered_data.append(item)
+            
+        logger.info(f"Alignment Check: Dropped {dropped_count} pairs based on length ratio threshold {threshold}")
+        return filtered_data
