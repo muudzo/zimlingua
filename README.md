@@ -1,6 +1,6 @@
-# ZimLingua
+# ZimLingua v1.0.0
 
-**Status**: Phase 4 (Fine-Tuning) - Complete
+**Status**: Ready for Production
 
 ZimLingua is an offline, high-performance neural machine translation tool specialized for low-resource languages (Shona/Ndebele/English) using NLLB-200 and CTranslate2.
 
@@ -49,3 +49,29 @@ ZimLingua is an offline, high-performance neural machine translation tool specia
    ```bash
    python scripts/convert_model.py --model models/merged_model --output models/ctranslate2_finetuned
    ```
+
+## Usage
+
+### Command Line Interface (CLI)
+Translate a single sentence:
+```bash
+python src/cli.py translate "Hello World" --src en --tgt sn
+```
+
+Translate a file:
+```bash
+python src/cli.py file my_doc.txt --out translated_doc.txt --src en --tgt sn
+```
+
+### Web Interface
+Run the local Streamlit UI:
+```bash
+streamlit run app.py
+```
+
+### Docker
+Build and run the container:
+```bash
+docker build -t zimlingua .
+docker run -p 8501:8501 zimlingua
+```
