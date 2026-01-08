@@ -50,8 +50,35 @@ def _handle_single_translate(translator, text, src, tgt):
     print(f"\n[{src} -> {tgt}]: {results[0]}\n")
 
 def _handle_file_translate(translator, path, out_path, src, tgt):
-    # Skeleton for file handling
-    pass
+    input_path = Path(path)
+    if not input_path.exists():
+        logger.error(f"Input file not found: {path}")
+        return
+
+    if out_path is None:
+        out_path = input_path.with_name(f"{input_path.stem}_translated{input_path.suffix}")
+    
+    logger.info(f"Translating {path} to {out_path} ({src}->{tgt})...")
+    
+    with open(input_path, 'r', encoding='utf-8') as f_in, \
+         open(out_path, 'w', encoding='utf-8') as f_out:
+        
+        lines = f_in.readlines()
+        # Batch processing could be optimized here (chunking)
+        # For simplicity, we process in chunks of 32
+        batch_size = 32
+        
+        for i in range(0, len(lines), batch_size):
+            batch_lines = [line.strip() for line in lines[i:i+batch_size] if line.strip()]
+            if not batch_lines:
+                continue
+                
+            translated_batch = translator.translate_batch(batch_lines, source_lang=src, target_lang=tgt)
+            
+            for trans_line in translated_batch:
+                f_out.write(trans_line + "\n")
+                
+    logger.info("File translation complete.")
 
 if __name__ == "__main__":
     main()
