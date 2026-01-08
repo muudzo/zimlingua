@@ -84,3 +84,12 @@ class ZimTrainer:
         
         self.trainer.train()
         logger.info("Training complete.")
+    
+    def save_model(self, final_name: str = "adapter_model"):
+        """
+        Saves the final LoRA adapter.
+        """
+        save_path = f"{self.output_dir}/{final_name}"
+        self.model.save_pretrained(save_path)
+        self.tokenizer.save_pretrained(save_path)
+        logger.info(f"LoRA adapter saved to {save_path}")
