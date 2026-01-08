@@ -114,3 +114,15 @@ class DataLoader:
         
         logger.info(f"Deduplication: Removed {len(data) - len(deduplicated_data)} duplicates. Remaining: {len(deduplicated_data)}")
         return deduplicated_data
+
+    def get_tokenizer(self, model_name: str = "facebook/nllb-200-distilled-600M"):
+        """
+        Returns the NLLB tokenizer.
+        """
+        from transformers import AutoTokenizer
+        try:
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            return tokenizer
+        except Exception as e:
+            logger.error(f"Failed to load tokenizer for {model_name}: {e}")
+            raise
