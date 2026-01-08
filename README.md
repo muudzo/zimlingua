@@ -1,8 +1,13 @@
 # ZimLingua
 
-**Status**: Phase 1 (Infrastructure) - Initial Setup
+**Status**: Phase 4 (Fine-Tuning) - Complete
 
 ZimLingua is an offline, high-performance neural machine translation tool specialized for low-resource languages (Shona/Ndebele/English) using NLLB-200 and CTranslate2.
+
+## Features
+- **Offline Inference**: Fast CPU inference using Int8 quantization
+- **Custom Fine-Tuning**: Easy-to-use LoRA training pipeline
+- **Data Processing**: Tools for normalizing and cleaning datasets
 
 ## Project Scope
 - **Languages**: English (en), Shona (sn), Ndebele (nd)
@@ -26,5 +31,21 @@ ZimLingua is an offline, high-performance neural machine translation tool specia
    ```
 2. Run tests:
    ```bash
+   ```bash
    pytest
+   ```
+
+## How to Fine-tune on your own data
+1. Place your CSV data (columns: `source`, `target`) in `data/`.
+2. Run the training script:
+   ```bash
+   python scripts/run_training.py --data my_dataset.csv --epochs 5
+   ```
+3. Merge the LoRA adapter into the base model:
+   ```bash
+   python scripts/merge_lora.py --adapter models/checkpoints/final_adapter --output models/merged_model
+   ```
+4. Convert to CTranslate2 for inference:
+   ```bash
+   python scripts/convert_model.py --model models/merged_model --output models/ctranslate2_finetuned
    ```
