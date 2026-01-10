@@ -1,6 +1,10 @@
 import argparse
 from pathlib import Path
 import sys
+
+# Add project root to path
+sys.path.append(str(Path(__file__).parent.parent))
+
 from src.translator import Translator
 from src.utils import logger
 from src.config import config
